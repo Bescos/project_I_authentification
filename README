@@ -1,7 +1,7 @@
-s_auth.rb
+sinatra.rb
 
 spec/
-|___ s_auth_spec.rb
+|___ sinatra_spec.rb
 
 
 middleware/
