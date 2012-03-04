@@ -1,0 +1,31 @@
+s_auth.rb
+
+spec/
+|___ s_auth_spec.rb
+
+
+middleware/
+|___ lib
+|     |___ rack_cookie_session.rb
+|     |___ rack_session.rb
+|     |___ rack_debug.rb
+|     |___ rack_auth.rb
+|___ spec
+|     |___ rack_auth_spec.rb
+|
+|____my_middleware.rb
+
+views/
+|___ protected.erb
+|
+|___ sessions
+         |____ new.erb
+
+database.rb
+migration.rb
+
+bd/
+|___ development.sqlite3
+|___ migrate
+
+Gemfile
