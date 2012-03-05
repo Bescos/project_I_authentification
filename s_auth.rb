@@ -2,9 +2,13 @@ require 'sinatra'
 $: << File.join(File.dirname(__FILE__),"","middleware")
 require 'my_middleware'
 
+$: << File.join(File.dirname(__FILE__),"")
+require 'lib/user'
+
+require 'spec/spec_helper'
+
 use RackCookieSession
 use RackSession
-#use RackAuth
 
 helpers do 
   def current_user
@@ -15,6 +19,7 @@ helpers do
     session["current_user"] = nil
   end
 end
+
 
 
 #La page protégée de l'application est affichée que si l'utilisateur est enregistré et logué 
@@ -28,10 +33,19 @@ get '/appli_cliente1/protected' do
 end
 
 #Charge le template erb pour une nouvelle connexion
-get '/sauth/appli_cliente1/sessions/new' do
+get '/appli_cliente_1/sessions/new' do
   erb :"sessions/new"
 end
 
-
-
+#Si le login et le mot de passe passés en post correspondent à une ligne de la table users de la base de donnée, lutilisateur est redirigee vers lapplication et la page dorigine
+#Sinon recharge le formulaire de connexion
+post '/sessions' do
+  params.inspect
+  login = params[:login]
+  password = params[:password]
+  u = User.find_by_login(login)
+  if u.password == password
+    puts "OUAIIIIIIIIIIS"
+  end 
+end
 
