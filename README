@@ -1,4 +1,6 @@
-sinatra.rb
+appli_cliente_1.rb
+appli_cliente_2.rb
+s_auth.rb
 
 spec/
 |___ sinatra_spec.rb
