@@ -11,7 +11,7 @@ describe 'The Authentication App' do
   
   context "scenario 1: Utilisateur non connecte" do
 
-   it "should respond with a form for the application" do
+   it "should respond with a form for the logging" do
     get '/s_auth/appli_cliente_1/sessions/new'
     last_response.should be_ok
     last_response.status.should == 200
@@ -42,6 +42,20 @@ describe 'The Authentication App' do
    end
 
  end
+
+  context "scenario2: Lutilisateur veut senregistrer" do
+   it "should respond with a form for the registering" do
+    get '/s_auth/appli_client_1/register'
+    last_response.should be_ok
+    last_response.status.should == 200
+   end
+   it "should redirect the user to the login page" do
+    params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+    post '/register', params
+    last_response.status.should == 302
+    last_response.headers["Location"].should == "http://example.org/s_auth/appli_cliente_1/sessions/new"
+   end
+  end
 
 end
  

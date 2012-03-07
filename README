@@ -1,32 +1,44 @@
-appli_cliente_1.rb
-appli_cliente_2.rb
-s_auth.rb
+Déroulement des tests :
 
-spec/
-|___ s_auth_spec.rb
+- Test de la fonction de logging
+  
+- Test de la fonction d'enregistrement
 
 
-middleware/
-|___ lib
-|     |___ rack_cookie_session.rb
-|     |___ rack_session.rb
-|     |___ rack_debug.rb
-|___ spec
-|     |___ rack_auth_spec.rb
-|
-|____my_middleware.rb
 
-views/
-|___ protected.erb
-|
-|___ sessions
-         |____ new.erb
+Arborescence du projet :
+.
+├── appli_cliente_1.rb
+├── config
+│   └── database.yml
+├── database.rb
+├── db
+│   ├── development.sqlite3
+│   └── migrate
+│       ├── 001_create_users.rb
+│       ├── 002_add_login_password.rb
+│       ├── 003_add_city_email.rb
+│       └── 004_add_last_name_first_name.rb
+├── Gemfile
+├── Gemfile.lock
+├── lib
+│   └── user.rb
+├── middleware
+│   ├── lib
+│   │   ├── rack_cookie_session.rb
+│   │   ├── rack_debug.rb
+│   │   └── rack_session.rb
+│   └── my_middleware.rb
+├── migration.rb
+├── README
+├── s_auth.rb
+├── spec
+│   ├── s_auth_spec.rb
+│   ├── spec_helper.rb
+│   └── user_spec.rb
+└── views
+    ├── protected.erb
+    ├── register.erb
+    └── sessions
+        └── new.erb
 
-database.rb
-migration.rb
-
-bd/
-|___ development.sqlite3
-|___ migrate
-
-Gemfile

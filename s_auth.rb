@@ -21,7 +21,6 @@ helpers do
 end
 
 
-
 #La page protégée de l'application est affichée que si l'utilisateur est enregistré et logué 
 get '/appli_cliente1/protected' do
   if current_user
@@ -38,11 +37,11 @@ get '/s_auth/appli_cliente_1/sessions/new' do
   erb :"sessions/new", :locals => {:error => msg_error}
 end
 
+
 #Si le login et le mot de passe passés en post correspondent à une ligne de la table users de la base de donnée, lutilisateur est redirigee vers lapplication et la page dorigine
 #Sinon recharge le formulaire de connexion
 post '/sessions' do
-   #Récupération des champs du formulaire
-  params.inspect
+  #Récupération des champs du formulaire
   login = params[:login]
   password = params[:password]
   u = nil
@@ -63,6 +62,26 @@ post '/sessions' do
   if u==nil
     redirect '/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
   end
+end
+
+get '/s_auth/appli_client_1/register' do
+  msg_error = params[:error]
+  erb :"register", :locals => {:error => msg_error}
+end
+
+post '/register' do
+  login = params[:login]
+  password = params[:password]
   
+  #Si les champs login et mot de passe ne sont renseignés, on redirige l'utilisateur vers le formulaire d'enregistrement avec un message d'erreur
+
+
+  #Si les champs login et mot de passe sont renseignés, on teste l'enregistrement dans la base de données
+      #Si le login existe, on crée le user
+
+
+      #Si le login existe, on redirige l'utilisateur vers le formulaire d'enregistrement avec un message d'erreur
+
+
 end
 
