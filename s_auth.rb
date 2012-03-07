@@ -1,6 +1,7 @@
 require 'sinatra'
 $: << File.join(File.dirname(__FILE__),"","middleware")
 require 'my_middleware'
+require 'digest/sha1'
 
 $: << File.join(File.dirname(__FILE__),"")
 require 'lib/user'
@@ -49,7 +50,7 @@ post '/sessions' do
   u = User.find_by_login(login)
 
   #Si  le user existe dans la base
-  if u!=nil and u.password == password
+  if u!=nil and u.password == Digest::SHA1.hexdigest(password).inspect
    redirect '/appli_cliente1/protected'
   end 
 
