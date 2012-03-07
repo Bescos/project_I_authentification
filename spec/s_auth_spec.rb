@@ -9,7 +9,29 @@ describe 'The Authentication App' do
    Sinatra::Application
   end
   
-  context "scenario 1: Utilisateur non connecte" do
+  context "scenario 1: Lutilisateur veut senregistrer" do
+   it "should respond with a form for the registering" do
+    get '/s_auth/appli_cliente_1/register'
+    last_response.should be_ok
+    last_response.status.should == 200
+   end
+   it "should redirect the user to the login page with a login message" do
+    post '/register', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+    last_response.status.should == 302
+    last_response.headers["Location"].should == 'http://example.org/s_auth/appli_cliente_1/sessions/new?newuser=Bienvenue_vous_pouvez_maintenant_vous_connecter'
+   end
+  end
+   context "Erreurs" do
+    it "should redirect the user to the register page with an error message because the login is already used" do
+     post '/register', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+     last_response.status.should == 302
+     last_response.headers["Location"].should == 'http://example.org/s_auth/appli_cliente_1/register?error=Login_deja_utilise'
+    end
+  
+  end
+
+
+  context "scenario 2: Utilisateur non connecte" do
 
    it "should respond with a form for the logging" do
     get '/s_auth/appli_cliente_1/sessions/new'
@@ -20,13 +42,13 @@ describe 'The Authentication App' do
 
    context "the user is registered and try to connect" do
     it "should redirect the user to the application because the login and password are ok" do
-     params = {'login'=>"toto", 'password'=>"toto"}
+     params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
      post '/sessions', params
      last_response.status.should == 302
      last_response.headers["Location"].should == "http://example.org/appli_cliente1/protected"
     end
     it "should redirect the user to the login page with a warning message because the password is incorrect" do
-     params = {'login'=>"toto", 'password'=>"bub"}
+     params = {'login'=>"TestAjout", 'password'=>"TestFaux"}
      post '/sessions', params
      last_response.status.should == 302
      last_response.headers["Location"].should == 'http://example.org/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
@@ -35,27 +57,13 @@ describe 'The Authentication App' do
 
    context "the user is not registered and try to connect" do
     it "should redirect the user to the login page with a warning message" do
-     post '/sessions', params={"login" => "tata", "password" => ""}
+     post '/sessions', params={"login" => "Test", "password" => "TestAjout"}
      last_response.status.should == 302
      last_response.headers["Location"].should == 'http://example.org/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
     end
    end
-
+   #Destruction of the database
+  User.all.each{|u| u.destroy}
  end
-
-  context "scenario2: Lutilisateur veut senregistrer" do
-   it "should respond with a form for the registering" do
-    get '/s_auth/appli_client_1/register'
-    last_response.should be_ok
-    last_response.status.should == 200
-   end
-   it "should redirect the user to the login page" do
-    params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
-    post '/register', params
-    last_response.status.should == 302
-    last_response.headers["Location"].should == "http://example.org/s_auth/appli_cliente_1/sessions/new"
-   end
-  end
-
 end
  

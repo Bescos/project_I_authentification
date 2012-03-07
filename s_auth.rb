@@ -33,8 +33,9 @@ end
 
 #Charge le template erb pour une nouvelle connexion
 get '/s_auth/appli_cliente_1/sessions/new' do
+  msg_logging = params[:newuser]
   msg_error = params[:error]
-  erb :"sessions/new", :locals => {:error => msg_error}
+  erb :"sessions/new", :locals => {:newuser => msg_logging,:error => msg_error}
 end
 
 
@@ -64,24 +65,39 @@ post '/sessions' do
   end
 end
 
-get '/s_auth/appli_client_1/register' do
+get '/s_auth/appli_cliente_1/register' do
   msg_error = params[:error]
   erb :"register", :locals => {:error => msg_error}
 end
 
 post '/register' do
-  login = params[:login]
-  password = params[:password]
+  u = User.new
+  u.login = params[:login]
+  u.password = params[:password]
+  u.last_name = params[:last_name]
+  u.first_name = params[:first_name]
+  u.city = params[:city]
+  u.email = params[:email]
   
-  #Si les champs login et mot de passe ne sont renseignés, on redirige l'utilisateur vers le formulaire d'enregistrement avec un message d'erreur
-
-
+  #Si les champs login et mot de passe ne sont pas renseignés, on redirige l'utilisateur vers le formulaire d'enregistrement avec un message d'erreur
+  if u.login == nil or u.password == nil
+    redirect '/s_auth/appli_cliente_1/register?error=Login_ou_mot_de_passe_non_renseigne' 
+  else
   #Si les champs login et mot de passe sont renseignés, on teste l'enregistrement dans la base de données
-      #Si le login existe, on crée le user
-
-
-      #Si le login existe, on redirige l'utilisateur vers le formulaire d'enregistrement avec un message d'erreur
-
-
+      #Si le user est valide, on crée le user et on le redirige vers le formulaire d'authentification
+      if u.valid?
+        u.save
+        redirect '/s_auth/appli_cliente_1/sessions/new?newuser=Bienvenue_vous_pouvez_maintenant_vous_connecter'
+      #User invalide
+      else
+       #Si le login existe, on redirige l'utilisateur vers le formulaire d'enregistrement avec un message d'erreur
+       if User.find_by_login(u.login) != nil
+         redirect '/s_auth/appli_cliente_1/register?error=Login_deja_utilise' 
+       #Non respect des conditions de remplissage des champs du login 
+       else
+         redirect '/s_auth/appli_cliente_1/register?error=Erreur_dans_le_remplissage_des_champs' 
+       end
+      end
+  end
 end
 
