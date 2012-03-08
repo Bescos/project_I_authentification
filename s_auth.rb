@@ -21,21 +21,21 @@ helpers do
   end
 end
 
+["appli_cliente_1", "/appli_client_2"].each do |applications|
+
 
 #La page protégée de l'application est affichée que si l'utilisateur est enregistré et logué 
-get '/appli_cliente1/protected' do
+get '/s_auth/protected' do
   if current_user
     erb :protected, :locals => {:user => current_user}
   else
     #redirection vers la page de login avec sauvegarde de l'application demandée dans origine
-    redirect '/sauth/appli_cliente1/sessions/new?origine=/protected'
+    redirect '/sauth/appli_cliente_1/sessions/new?origine=/protected'
   end
 end
 
-
-get '/s_auth/appli_cliente_1/register' do
-  msg_error = params[:error]
-  erb :"register", :locals => {:error => msg_error}
+get '/register' do
+  erb :"register", :locals => {:user => nil}
 end
 
 post '/register' do
@@ -47,35 +47,22 @@ post '/register' do
   u.city = params[:city]
   u.email = params[:email]
   
-  #Si les champs login et mot de passe ne sont pas renseignés, on redirige l'utilisateur vers le formulaire d'enregistrement avec un message d'erreur
-  if u.login == nil or u.password == nil
-    redirect '/s_auth/appli_cliente_1/register?error=Login_ou_mot_de_passe_non_renseigne' 
+
+  #Si le user est valide, on crée le user et on le redirige vers le formulaire d'authentification
+  if u.valid?
+   u.save
+   redirect '/sessions/new'
+   #User invalide
   else
-  #Si les champs login et mot de passe sont renseignés, on teste l'enregistrement dans la base de données
-      #Si le user est valide, on crée le user et on le redirige vers le formulaire d'authentification
-      if u.valid?
-        u.save
-        redirect '/s_auth/appli_cliente_1/sessions/new?newuser=Bienvenue_vous_pouvez_maintenant_vous_connecter'
-      #User invalide
-      else
-       #Si le login existe, on redirige l'utilisateur vers le formulaire d'enregistrement avec un message d'erreur
-       if User.find_by_login(u.login) != nil
-         redirect '/s_auth/appli_cliente_1/register?error=Login_deja_utilise' 
-       #Non respect des conditions de remplissage des champs du login 
-       else
-         redirect '/s_auth/appli_cliente_1/register?error=Erreur_dans_le_remplissage_des_champs' 
-       end
-      end
+     erb :"register", :locals => {:user => u}
   end
 end
 
 
 
 #Charge le template erb pour une nouvelle connexion
-get '/s_auth/appli_cliente_1/sessions/new' do
-  msg_logging = params[:newuser]
-  msg_error = params[:error]
-  erb :"sessions/new", :locals => {:newuser => msg_logging,:error => msg_error}
+get '/sessions/new' do
+  erb :"sessions/new", :locals => {:user => nil}
 end
 
 
@@ -91,26 +78,21 @@ post '/sessions' do
   #Si  le user existe dans la base
   if u!=nil and u.password == Digest::SHA1.hexdigest(password).inspect
    session["current_user"] = login
-   redirect '/appli_cliente1/protected'
+   redirect '/appli_cliente_1/protected'
   end 
 
   #Si le mot de passe est incorrect
-  if u!=nil and u.password != password
-    redirect '/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
-    puts 'password faux'
+  if u==nil or u.password != Digest::SHA1.hexdigest(password).inspect
+    erb :"sessions/new", :locals => {:user => u}
   end
 
-  #Si le user n'existe pas dans la base
-  if u==nil
-    redirect '/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
-  end
 end
 
 
 get '/sessions/disconnect' do
   session["current_user"] = nil
-  erb :"sessions/new" 
+  erb :"sessions/new", :locals => {:user => u}
 end
 
-
+end
 
