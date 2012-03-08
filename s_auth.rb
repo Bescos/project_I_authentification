@@ -8,8 +8,8 @@ require 'lib/user'
 
 require 'spec/spec_helper'
 
-#use RackCookieSession
-#use RackSession
+enable :sessions
+
 
 helpers do 
   def current_user
@@ -32,39 +32,6 @@ get '/appli_cliente1/protected' do
   end
 end
 
-#Charge le template erb pour une nouvelle connexion
-get '/s_auth/appli_cliente_1/sessions/new' do
-  msg_logging = params[:newuser]
-  msg_error = params[:error]
-  erb :"sessions/new", :locals => {:newuser => msg_logging,:error => msg_error}
-end
-
-
-#Si le login et le mot de passe passés en post correspondent à une ligne de la table users de la base de donnée, lutilisateur est redirigee vers lapplication et la page dorigine
-#Sinon recharge le formulaire de connexion
-post '/sessions' do
-  #Récupération des champs du formulaire
-  login = params[:login]
-  password = params[:password]
-  u = nil
-  u = User.find_by_login(login)
-
-  #Si  le user existe dans la base
-  if u!=nil and u.password == Digest::SHA1.hexdigest(password).inspect
-   redirect '/appli_cliente1/protected'
-  end 
-
-  #Si le mot de passe est incorrect
-  if u!=nil and u.password != password
-    redirect '/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
-    puts 'password faux'
-  end
-
-  #Si le user n'existe pas dans la base
-  if u==nil
-    redirect '/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
-  end
-end
 
 get '/s_auth/appli_cliente_1/register' do
   msg_error = params[:error]
@@ -101,4 +68,49 @@ post '/register' do
       end
   end
 end
+
+
+
+#Charge le template erb pour une nouvelle connexion
+get '/s_auth/appli_cliente_1/sessions/new' do
+  msg_logging = params[:newuser]
+  msg_error = params[:error]
+  erb :"sessions/new", :locals => {:newuser => msg_logging,:error => msg_error}
+end
+
+
+#Si le login et le mot de passe passés en post correspondent à une ligne de la table users de la base de donnée, lutilisateur est redirigee vers lapplication et la page dorigine
+#Sinon recharge le formulaire de connexion
+post '/sessions' do
+  #Récupération des champs du formulaire
+  login = params[:login]
+  password = params[:password]
+  u = nil
+  u = User.find_by_login(login)
+
+  #Si  le user existe dans la base
+  if u!=nil and u.password == Digest::SHA1.hexdigest(password).inspect
+   session["current_user"] = login
+   redirect '/appli_cliente1/protected'
+  end 
+
+  #Si le mot de passe est incorrect
+  if u!=nil and u.password != password
+    redirect '/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
+    puts 'password faux'
+  end
+
+  #Si le user n'existe pas dans la base
+  if u==nil
+    redirect '/s_auth/appli_cliente_1/sessions/new?error=Identifiants_incorrects'
+  end
+end
+
+
+get '/sessions/disconnect' do
+  session["current_user"] = nil
+  erb :"sessions/new" 
+end
+
+
 
