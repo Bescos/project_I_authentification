@@ -19,7 +19,7 @@ describe 'The Authentication App' do
    it "should store the user and redirect him to the login page with a login message" do
     post '/users', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
     last_response.status.should == 302
-    last_response.headers["Location"].should == 'http://example.org/sessions/new'
+    last_response.headers["Location"].should == 'http://example.org/users/TestAjout'
    end
    context "Erreurs" do
     it "should send the erb form again to the user with the wrong fields let empty" do
@@ -75,6 +75,31 @@ describe 'The Authentication App' do
    end
    #Destruction of the database
   User.all.each{|u| u.destroy}
+  end
+
+  describe "Application registration" do
+    describe "get /applications/new" do
+      it "should return a form to post register our application" do
+        get '/applications/new'
+        last_response.should be_ok
+        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
+      end
+    end
+    describe "post /applications" do
+      params = { 'name' => "appli_cliente_1", 'url' => "http://localhost:4567/appli_cliente_1"} 
+      it "should create a new application" do
+        Application.stub(:create)
+        Application.should_receive(:create).with(params['name'], params['url'])
+        post '/applications', params
+      end 
+      it "should redirect to the application private page" do
+        Application.stub(:create){true}
+        post '/applications', params
+        last_response.should be_redirect
+        follow_redirect!
+        last_request.path.should == '/applications/appli_cliente_1'
+      end
+   end
   end
  end
 

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Application Registration Page</title>
+</head>
+<body>
+
+<h1>New application</h1>
+
+<form action="/applications" method="post">
+  <div class="field">
+    <label for="application_name">Application Name (*)</label><br />
+    <input id="application_name" name="name" size="30" type="text"/>
+  </div>
+  <div class="field">
+    <label for="application_url">URL (*)</label><br />
+    <input id="application_url" name="url" size="60" type="text"/>
+  </div>
+  <div class="actions">
+    <input name="commit" type="submit" value="Create application" />
+
+  </div>
+</form>
+
+</body>
+</html>
+
