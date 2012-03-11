@@ -11,23 +11,21 @@ describe 'The Authentication App' do
   
   context "First case: User wants to register" do
    it "should respond with a form for the registering" do
-    get '/register'
+    get '/users/new'
     last_response.should be_ok
     last_response.status.should == 200
-    #Taille de la page de register
-    last_response.headers["Content-Length"].should == "1339"
+    last_response.body.should match %r{<form.*action="/users".*method="post".*}
    end
    it "should store the user and redirect him to the login page with a login message" do
-    post '/register', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+    post '/users', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
     last_response.status.should == 302
     last_response.headers["Location"].should == 'http://example.org/sessions/new'
    end
    context "Erreurs" do
     it "should send the erb form again to the user with the wrong fields let empty" do
-     post '/register', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+     post '/users', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
      last_response.status.should == 200
-     #Taille de la page de register
-     last_response.headers["Content-Length"].should == "1390"
+     last_response.body.should match %r{<form.*action="/users".*method="post".*}
     end
    end
   end
@@ -37,8 +35,7 @@ describe 'The Authentication App' do
    it "should respond with a form for the logging" do
     get '/sessions/new'
     last_response.should be_ok
-    last_response.status.should == 200
-    #to test if it respond the form, we test into a browser
+    last_response.body.should match %r{<form.*action="/sessions".*method="post".*}
    end
 
    context "the user is registered and try to connect" do

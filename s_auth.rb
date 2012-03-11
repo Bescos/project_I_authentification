@@ -34,11 +34,11 @@ get '/s_auth/protected' do
   end
 end
 
-get '/register' do
-  erb :"register", :locals => {:user => nil}
+get '/users/new' do
+  erb :"users/new", :locals => {:user => nil}
 end
 
-post '/register' do
+post '/users' do
   u = User.new
   u.login = params[:login]
   u.password = params[:password]
@@ -54,7 +54,7 @@ post '/register' do
    redirect '/sessions/new'
    #User invalide
   else
-     erb :"register", :locals => {:user => u}
+     erb :"users/new", :locals => {:user => u}
   end
 end
 
@@ -78,7 +78,7 @@ post '/sessions' do
   #Si  le user existe dans la base
   if u!=nil and u.password == Digest::SHA1.hexdigest(password).inspect
    session["current_user"] = login
-   redirect '/appli_cliente_1/protected'
+   redirect "/sessions/#{params['login']}"
   end 
 
   #Si le mot de passe est incorrect

@@ -33,5 +33,12 @@ describe User do
   u.password='TestPassword'
   u.password.should == "\"6250625b226df62870ae23af8d3fac0760d71588\""
  end
+ 
+ it "should not encode the password because its empty" do
+  u = User.new
+  u.password=''
+  u.password.should be_nil
+  u.valid?.should be_false
+ end
 
 end
