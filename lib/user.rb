@@ -2,13 +2,16 @@ require 'active_record'
 require 'digest/sha1'
 
 class User < ActiveRecord::Base
+  has_many :utilizations
+  has_many :applications, :through => :utilizations
+
   validates :login, :presence => true
   validates :password, :presence => true
   validates :login, :uniqueness => true
 
 
 def password=(pass)
-  unless pass.nil?
+  if !pass.empty?
    self[:password] = User.encrypt_password(pass)
   end
 end
