@@ -1,5 +1,5 @@
 require_relative 'spec_helper'
-require_relative '../lib/user'
+
 
 describe User do
  it "sould not be valid without a login or a password" do
@@ -36,6 +36,7 @@ describe User do
  
  it "should not encode the password because its empty" do
   u = User.new
+  u.login = 'testPasswordNil'
   u.password=''
   u.password.should be_nil
   u.valid?.should be_false

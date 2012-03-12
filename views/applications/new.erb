@@ -7,6 +7,16 @@
 
 <h1>New application</h1>
 
+<% if @error_application.nil? %>
+
+<p > To add an application, please enter the application name and the URL : </p>
+
+<% else %>
+<p>
+<%= @error_application %>
+</p>
+<% end %>
+
 <form action="/applications" method="post">
   <div class="field">
     <label for="application_name">Application Name (*)</label><br />
