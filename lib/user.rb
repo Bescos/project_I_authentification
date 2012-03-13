@@ -5,6 +5,7 @@ class User < ActiveRecord::Base
   has_many :utilizations
   has_many :applications, :through => :utilizations
 
+  has_many :applications
   validates :login, :presence => true
   validates :password, :presence => true
   validates :login, :uniqueness => true
