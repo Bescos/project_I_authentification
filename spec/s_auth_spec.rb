@@ -107,52 +107,59 @@ describe 'The Authentication App' do
       end
     end
     describe "post /applications" do
-      params = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1"} 
-          
-      context "Validation of the post request" do
-        before(:each) do
-          appli = double(:application)
-          post '/applications', params
+      context "User connected and want to add an application" do
+		    before(:each) do
+	 				post '/users', {'login' => "toto", 'password' => "toto"}
+		    end
+        after(:each) do
+          User.all.each{|u| u.destroy}
         end
 
-        it "should respond with a secret" do
-          last_response.status.should == 302
-          last_response.headers["Location"].should == "http://example.org/applications/appli_cliente_1?secret=IamSAuth"
-        end
-      end
-      
-      context "Errors" do
- 
-        it "should send the application form again to the user because the name already exists" do
-          params = { 'name' => "appli_cliente_1", 'url' => "Erreur1"} 
-          post '/applications', params
-          last_response.status.should == 200
-          last_response.body.should match %r{<form.*action="/applications".*method="post".*}
-        end
-        it "should send the application form again to the user because the url already exists" do
-          params = { 'name' => "Erreur2", 'url' => "http://appli_cliente_1"} 
-          post '/applications', params
-          last_response.status.should == 200
-          last_response.body.should match %r{<form.*action="/applications".*method="post".*}
-        end
-        it "should send the application form again to the user because the name is empty" do
-          params = { 'name' => "", 'url' => "Erreur3"} 
-          post '/applications', params
-          last_response.status.should == 200
-          last_response.body.should match %r{<form.*action="/applications".*method="post".*}
-        end
-        it "should send the application form again to the user because the url is empty" do
-          params = { 'name' => "Erreur4", 'url' => ""} 
-          post '/applications', params
-          last_response.status.should == 200
-          last_response.body.should match %r{<form.*action="/applications".*method="post".*}
-        end
-      end 
-      #Destruction of the database       
-      Application.all.each{|a| a.destroy}
-   end
-    
-  end
+		    params = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1", 'user_id' => '1'} 
+		        
+		    context "Validation of the post request" do
+		      before(:each) do
+		        appli = double(:application)
+		        post '/applications', params
+		      end
+
+		      it "should respond with a secret" do
+		        last_response.status.should == 302
+		        last_response.headers["Location"].should == "http://example.org/applications/appli_cliente_1?secret=IamSAuth"
+		      end
+		    end
+		    
+		    context "Errors" do
+		      it "should send the application form again to the user because the name already exists" do
+		        params = { 'name' => "appli_cliente_1", 'url' => "Erreur1", 'user_id' => '1'} 
+		        post '/applications', params
+		        last_response.status.should == 200
+		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
+		      end
+		      it "should send the application form again to the user because the url already exists" do
+		        params = { 'name' => "Erreur2", 'url' => "http://appli_cliente_1", 'user_id' => '1'} 
+		        post '/applications', params
+		        last_response.status.should == 200
+		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
+		      end
+		      it "should send the application form again to the user because the name is empty" do
+		        params = { 'name' => "", 'url' => "Erreur3", 'user_id' => '1'} 
+		        post '/applications', params
+		        last_response.status.should == 200
+		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
+		      end
+		      it "should send the application form again to the user because the url is empty" do
+		        params = { 'name' => "Erreur4", 'url' => "", 'user_id' => '1'} 
+		        post '/applications', params
+		        last_response.status.should == 200
+		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
+		      end
+		    end 
+		    #Destruction of the database       
+		    Application.all.each{|a| a.destroy}
+		 end
+		 end
+		end
  end
 
   

@@ -42,6 +42,7 @@ post '/users' do
   #Si le user est valide, on crée le user et on le redirige vers son profil
   if @u.valid?
    @u.save
+   session["current_user"] = params[:login]
    redirect "/users/#{params['login']}"
    #User invalide
   else
@@ -112,18 +113,20 @@ get '/applications/new' do
 end
 
 post '/applications' do  
-  a = Application.new
-  a.name = params[:name]
-  a.url = params[:url]
- 
-  if a.valid? 
-    a.save
-    redirect "/applications/#{params[:name]}?secret=IamSAuth"
-  else
-    if !Application.find_by_name(a.name).nil?
-      @error_application = "Application already exists !"
-      erb :"applications/new"
-    else 
+  if current_user
+    a = Application.new
+    a.name = params[:name]
+    a.url = params[:url]
+    a.user_id = params[:user_id]
+
+    if a.valid? 
+      a.save
+      redirect "/applications/#{params[:name]}?secret=IamSAuth"
+    else
+      if !Application.find_by_name(a.name).nil?
+        @error_application = "Application already exists !"
+        erb :"applications/new"
+      else 
          if !Application.find_by_url(a.url).nil?
             @error_application = "URL already exists !"
             erb :"applications/new"
@@ -133,8 +136,12 @@ post '/applications' do
               erb :"applications/new"
            end
          end
-    end
-  end
+    	end
+  	end
+  else 
+    @error_session = "Please connect first"
+    erb :"sessions/new"
+  end    
 end
 
 get '/applications/:name' do
