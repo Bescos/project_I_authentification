@@ -14,6 +14,8 @@ class User < ActiveRecord::Base
 def password=(pass)
   if !pass.empty?
    self[:password] = User.encrypt_password(pass)
+  else 
+   self[:password] = nil
   end
 end
 
