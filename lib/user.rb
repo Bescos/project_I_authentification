@@ -20,7 +20,16 @@ def password=(pass)
 end
 
 def self.encrypt_password(pass)
-    Digest::SHA1.hexdigest(pass).inspect
+    Digest::SHA1.hexdigest(pass).inspect[1,40]
+end
+
+def self.authentication(params)
+	u = find_by_login(params['login'])
+	if u and u.password == Digest::SHA1.hexdigest(params['password'])
+		true
+	else
+		nil
+	end
 end
 
 end

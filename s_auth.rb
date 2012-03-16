@@ -4,8 +4,6 @@ $: << File.join(File.dirname(__FILE__),"","middleware")
 require 'digest/sha1'
 
 $: << File.join(File.dirname(__FILE__),"")
-require 'lib/user'
-require 'lib/application'
 
 require 'spec/spec_helper'
 
@@ -31,17 +29,10 @@ end
 
 #Crée un utilisateur s'il est valide et redirige le user vers sa page de profil ou vers le meme formulaire en cas d'erreur
 post '/users' do
-  @u = User.new
-  @u.login = params[:login]
-  @u.password = params[:password]
-  @u.last_name = params[:last_name]
-  @u.first_name = params[:first_name]
-  @u.city = params[:city]
-  @u.email = params[:email]
-  
+  @u = User.new(params)
+ 
   #Si le user est valide, on crée le user et on le redirige vers son profil
-  if @u.valid?
-   @u.save
+  if @u.save
    session["current_user"] = params[:login]
    redirect "/users/#{params['login']}"
    #User invalide
@@ -68,23 +59,12 @@ end
 #Si le login et le mot de passe passés en post correspondent à une ligne de la table users de la base de donnée, lutilisateur est redirigee vers son profil ou lapplication dorigine
 #Sinon recharge le formulaire de connexion
 post '/sessions' do
-  #Récupération des champs du formulaire
-  @u = User.find_by_login(params[:login])
-
-  #Si  le user existe dans la base
-  if @u!=nil and @u.password == Digest::SHA1.hexdigest(params[:password]).inspect
+	if User.authentication(params)
    session["current_user"] = params[:login]
    redirect "/users/#{params[:login]}"
-  end 
-
-  #Si le mot de passe est incorrect
-  if @u==nil 
-    @error_session = "User does not exists !"
-    erb :"sessions/new"
-  else if @u.password != Digest::SHA1.hexdigest(params[:password]).inspect
-    @error_session = "Invalid password !"
-    erb :"sessions/new"
-       end
+  else
+		@errors="Wrong authentication"
+  	erb :"sessions/new"
   end
 
 end
