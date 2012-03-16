@@ -9,7 +9,7 @@ require 'lib/application'
 
 require 'spec/spec_helper'
 
-enable :sessions
+#enable :sessions
 
 
 helpers do 
@@ -46,18 +46,8 @@ post '/users' do
    redirect "/users/#{params['login']}"
    #User invalide
   else
-     if !User.find_by_login(@u.login).nil?
-       @error_new = "User already exists"
-       erb :"users/new"
-     else 
-       if params[:login]==""
-         @error_new = "Empty login"
-         erb :"users/new"
-       else
-         @error_new = "Incorrect password"
-         erb :"users/new"
-       end
-     end
+     @errors = @u.errors.messages
+		 erb :"users/new"
   end
 end
 
@@ -114,29 +104,17 @@ end
 
 post '/applications' do  
   if current_user
-    a = Application.new
-    a.name = params[:name]
-    a.url = params[:url]
-    a.user_id = params[:user_id]
+    @a = Application.new
+    @a.name = params[:name]
+    @a.url = params[:url]
+    @a.user_id = User.find_by_login(current_user)
 
-    if a.valid? 
-      a.save
+    if @a.valid? 
+      @a.save
       redirect "/applications/#{params[:name]}?secret=IamSAuth"
     else
-      if !Application.find_by_name(a.name).nil?
-        @error_application = "Application already exists !"
-        erb :"applications/new"
-      else 
-         if !Application.find_by_url(a.url).nil?
-            @error_application = "URL already exists !"
-            erb :"applications/new"
-         else 
-           if a.name=='' or a.url==''
-              @error_application = "Application name or URL empty"
-              erb :"applications/new"
-           end
-         end
-    	end
+      @errors = @a.errors.messages
+      erb :"applications/new"
   	end
   else 
     @error_session = "Please connect first"

@@ -27,10 +27,6 @@ describe Application do
     @a1.user_id = nil
     @a1.should_not be_valid
   end
-   it "should not be valid with a non numeric user_id" do
-   @a1.user_id = 'test'
-   @a1.should_not be_valid
-  end
 
   context "Uniqueness of url and name" do
    before (:each) do
@@ -49,6 +45,25 @@ describe Application do
     @a2.should_not be_valid
    end
   end
+
+	context "Link with a user" do
+		before (:each) do
+			@u = User.new
+			@u.login = "TestValid"
+  		@u.password = "TestValid"
+			@u.should be_valid
+      @u.save
+   	end
+		after(:each) do
+			User.all.each{|u| u.destroy}
+		end
+
+		it "should be valid with the id of the user" do
+			@a1.user_id = @u
+			@a1.should be_valid
+		end
+	end
+
  end
  
 

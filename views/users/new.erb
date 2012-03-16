@@ -7,16 +7,30 @@
 
 <h1>New user</h1>
 
-<% if @error_new.nil? %>
+<% if @errors.nil? %>
 
 <p > To subscribe, please write a login and a password : </p>
 
 <% else %>
 <p>
-<%= @error_new %>
+	<% if @errors[:password] %>
+	 Password can't be blank !
+	 <br />
+	<% end %>
+	<% if @errors[:login] %>
+  	<% if @errors[:login].include?("can't be blank") %>
+			Login can't be blank !
+  	<% end %>
+		<% if @errors[:login].include?("has already been taken") %>
+		Login
+		<%= @u.login %>
+		has already been taken
+		<% end %>
+	<% end %>
 </p>
 <% end %>
 
+<br />
 <form action="/users" method="post">
   <div class="field">
     <label for="user_login">Login (*)</label><br />

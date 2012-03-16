@@ -16,8 +16,10 @@ describe 'The Authentication App' do
     last_response.status.should == 200
     last_response.body.should match %r{<form.*action="/users".*method="post".*}
    end
-   it "should store the user and redirect him to the login page with a login message" do
-    post '/users', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+   it "should store the user and redirect him to the login page with a login message" do		
+		params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+
+    post '/users', params
     last_response.status.should == 302
     last_response.headers["Location"].should == 'http://example.org/users/TestAjout'
    end
@@ -108,19 +110,11 @@ describe 'The Authentication App' do
     end
     describe "post /applications" do
       context "User connected and want to add an application" do
-		    before(:each) do
-	 				post '/users', {'login' => "toto", 'password' => "toto"}
-		    end
-        after(:each) do
-          User.all.each{|u| u.destroy}
-        end
-
-		    params = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1", 'user_id' => '1'} 
-		        
 		    context "Validation of the post request" do
 		      before(:each) do
-		        appli = double(:application)
-		        post '/applications', params
+						params2 = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1"} 
+						User.stub(:find_by_login){'1'}
+		        post '/applications', params2, "rack.session" => { "current_user" => "toto" }
 		      end
 
 		      it "should respond with a secret" do
@@ -131,32 +125,39 @@ describe 'The Authentication App' do
 		    
 		    context "Errors" do
 		      it "should send the application form again to the user because the name already exists" do
-		        params = { 'name' => "appli_cliente_1", 'url' => "Erreur1", 'user_id' => '1'} 
-		        post '/applications', params
+		        params = { 'name' => "appli_cliente_1", 'url' => "Erreur1"} 
+		        post '/applications', params, "rack.session" => { "current_user" => "toto" }
 		        last_response.status.should == 200
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
 		      it "should send the application form again to the user because the url already exists" do
-		        params = { 'name' => "Erreur2", 'url' => "http://appli_cliente_1", 'user_id' => '1'} 
-		        post '/applications', params
+		        params = { 'name' => "Erreur2", 'url' => "http://appli_cliente_1"} 
+		        post '/applications', params, "rack.session" => { "current_user" => "toto" }
 		        last_response.status.should == 200
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
 		      it "should send the application form again to the user because the name is empty" do
-		        params = { 'name' => "", 'url' => "Erreur3", 'user_id' => '1'} 
-		        post '/applications', params
+		        params = { 'name' => "", 'url' => "Erreur3"} 
+		        post '/applications', params, "rack.session" => { "current_user" => "toto" }
 		        last_response.status.should == 200
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
 		      it "should send the application form again to the user because the url is empty" do
-		        params = { 'name' => "Erreur4", 'url' => "", 'user_id' => '1'} 
-		        post '/applications', params
+		        params = { 'name' => "Erreur4", 'url' => ""} 
+		        post '/applications', params, "rack.session" => { "current_user" => "toto" }
 		        last_response.status.should == 200
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
-		    end 
-		    #Destruction of the database       
+					it "should send the connetion form to the user because current_user is nil" do
+						get '/sessions/disconnect' 
+						params = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1"} 
+						post '/applications', params, "rack.session" => { "current_user" => nil }
+ 						last_response.status.should == 200
+						last_response.body.should match %r{<form.*action="/sessions".*method="post".*}
+					end
+		    end      
 		    Application.all.each{|a| a.destroy}
+				User.all.each{|u| u.destroy}
 		 end
 		 end
 		end

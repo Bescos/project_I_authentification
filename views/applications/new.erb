@@ -7,13 +7,32 @@
 
 <h1>New application</h1>
 
-<% if @error_application.nil? %>
+<% if @errors.nil? %>
 
 <p > To add an application, please enter the application name and the URL : </p>
 
 <% else %>
 <p>
-<%= @error_application %>
+	  <% if @errors[:name] %>
+			<% if @errors[:name].include?("can't be blank") %>
+				Name of the application can't be blank !
+			<% end %>
+			<% if @errors[:name].include?("has already been taken") %>
+			Name
+			<%= @a.name %>
+			has already been taken < br/>
+			<% end %>
+		<% end %>
+		<% if @errors[:url] %>
+			<% if @errors[:url].include?("can't be blank") %>
+				URL can't be blank !
+			<% end %>
+			<% if @errors[:url].include?("has already been taken") %>
+			URL
+			<%= @a.url %>
+			has already been taken
+			<% end %>
+	  <% end %>
 </p>
 <% end %>
 
