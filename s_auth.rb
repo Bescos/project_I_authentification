@@ -9,9 +9,17 @@ require 'spec/spec_helper'
 
 #enable :sessions
 
+set :cookie_manager , Hash.new
+def generate_cookie
+  SecureRandom.base64
+end
 
 helpers do 
   def current_user
+    cookie = request.cookies["sauthCookie"]
+    if !cookie.nil?
+      session["current_user"]=settings.cookie_manager[cookie]
+    end
     session["current_user"]
   end
 
@@ -60,10 +68,15 @@ end
 #Sinon recharge le formulaire de connexion
 post '/sessions' do
 	if User.authentication(params)
-   session["current_user"] = params[:login]
+	  login=params["login"]
+    session["current_user"]=login
+    cookie=generate_cookie
+    settings.cookie_manager[cookie]=login
+    response.set_cookie("sauthCookie",:value => cookie,:expires => Time.now+24*60*60) # 1 jour d'expiration
+   
    redirect "/users/#{params[:login]}"
   else
-		@errors="Wrong authentication"
+		@errors="Wrong authentication!"
   	erb :"sessions/new"
   end
 

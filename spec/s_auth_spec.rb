@@ -1,6 +1,7 @@
 $: << File.dirname(__FILE__)
 require 'rack/test'
 require_relative '../s_auth'
+require 'spec_helper'
 
 describe 'The Authentication App' do
  include Rack::Test::Methods
@@ -17,9 +18,9 @@ describe 'The Authentication App' do
     last_response.body.should match %r{<form.*action="/users".*method="post".*}
    end
    it "should store the user and redirect him to the login page with a login message" do		
-		params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+		params = {"user" => {'login'=>"TestAjout", 'password'=>"TestAjout"}}
 
-    post '/users', params
+    post '/users', params["user"]
     last_response.status.should == 302
     last_response.headers["Location"].should == 'http://example.org/users/TestAjout'
    end
@@ -51,25 +52,31 @@ describe 'The Authentication App' do
    end
 
    describe "the user is registered and try to connect" do
-    describe "the authentication is ok" do
+    context "the authentication is ok" do
+		 before(:each) do
+			 params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
+       post '/sessions', params
+		 end
+		
+		 it "should attribute a cookie to the user" do
+			 last_response.headers["Set-Cookie"].should be_true
+		 end
      it "should redirect the user to his profil because the login and password are ok" do
-      params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
-      post '/sessions', params
-      last_response.status.should == 302
-      last_response.headers["Location"].should == "http://example.org/users/TestAjout"
+       last_response.status.should == 302
+       last_response.headers["Location"].should == "http://example.org/users/TestAjout"
      end
      it "should store the login of the authenticated user" do
-      params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
-      post '/sessions', params
-      last_request.env["rack.session"]["current_user"].should == "TestAjout"
+       last_request.env["rack.session"]["current_user"].should == "TestAjout"
      end
-    it "should remove the variables of the current user when he disconnects" do
-      params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
-      post '/sessions', params
-      last_request.env["rack.session"]["current_user"].should == "TestAjout"
-      get '/sessions/disconnect'
-      last_request.env["rack.session"]["current_user"].should be_nil
-     end
+		 it "should display the user profile" do
+			 get '/users/testAjout'
+			 last_response.body.should match %r{<title>User-Profile Page</title>}
+		 end
+     it "should remove the variables of the current user when he disconnects" do
+       last_request.env["rack.session"]["current_user"].should == "TestAjout"
+       get '/sessions/disconnect'
+       last_request.env["rack.session"]["current_user"].should be_nil
+      end
     end
    end
    describe "Errors" do
@@ -149,8 +156,7 @@ describe 'The Authentication App' do
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
 					it "should send the connetion form to the user because current_user is nil" do
-						get '/sessions/disconnect' 
-						params = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1"} 
+						params = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1"}
 						post '/applications', params, "rack.session" => { "current_user" => nil }
  						last_response.status.should == 200
 						last_response.body.should match %r{<form.*action="/sessions".*method="post".*}
