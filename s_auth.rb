@@ -6,6 +6,7 @@ require 'digest/sha1'
 require_relative 'database'
 require_relative 'lib/user'
 require_relative 'lib/application'
+require_relative 'lib/utilization'
 
 #enable :sessions
 

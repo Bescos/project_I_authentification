@@ -189,16 +189,17 @@ describe 'The Authentication App' do
 					#PB Lors du test, Le sinatra ne récupère pas @back_url. Cela fonctionne lors du test d'intégration
 					last_response.headers["Location"].should include "http://appli_cliente_1/protected?login=TestAjout&secret="
 				end
-	
-				describe "Errors" do
-					it "should send the authentication form again because password is wrong" do
-						params = {'login'=>"TestAjout", 'password'=>"TestFaux"}
-				    post '/appli_cliente_1/sessions', params
-						last_response.status.should == 200
-						last_response.body.should match %r{<form.*action="/appli_cliente_1/sessions".*method="post".*}
-					end
+				it "should add the application to the list of utilization of the user" do
+					
 				end
-
+			end
+			describe "Errors" do
+				it "should send the authentication form again because password is wrong" do
+					params = {'login'=>"TestAjout", 'password'=>"TestFaux"}
+				  post '/appli_cliente_1/sessions', params
+					last_response.status.should == 200
+					last_response.body.should match %r{<form.*action="/appli_cliente_1/sessions".*method="post".*}
+				end
 			end
 		end
 	end 
