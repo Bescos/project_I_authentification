@@ -1,11 +1,11 @@
 require 'sinatra'
-$: << File.join(File.dirname(__FILE__),"","middleware")
+require 'active_record'
 
 require 'digest/sha1'
 
-$: << File.join(File.dirname(__FILE__),"")
-
-require 'spec/spec_helper'
+require_relative 'database'
+require_relative 'lib/user'
+require_relative 'lib/application'
 
 #enable :sessions
 
@@ -37,8 +37,14 @@ end
 
 #Crée un utilisateur s'il est valide et redirige le user vers sa page de profil ou vers le meme formulaire en cas d'erreur
 post '/users' do
-  @u = User.new(params)
- 
+  @u = User.new
+  @u.login = params[:login]
+	@u.password = params[:password]
+	@u.last_name = params[:last_name]
+	@u.first_name = params[:first_name]
+	@u.city = params[:city]
+	@u.email = params[:email]
+
   #Si le user est valide, on crée le user et on le redirige vers son profil
   if @u.save
    session["current_user"] = params[:login]
@@ -116,7 +122,34 @@ post '/applications' do
 end
 
 get '/applications/:name' do
-  "Application #{:name} cree"
+  "Application #{params[:name]} cree"
+end
+
+get '/:appli/sessions/new' do
+	if url_appli=Application.authentication(params[:appli])	
+		@appli=params[:appli]
+		@back_url=url_appli+params[:origin]
+		erb :"sessions/appli"
+	else 
+		"The authentication service does not know the application called #{params[:appli]}"
+	end
+end
+
+post '/:appli/sessions' do
+	if User.authentication(params)
+		login=params["login"]
+    session["current_user"]=login
+    cookie=generate_cookie
+    settings.cookie_manager[cookie]=login
+    response.set_cookie("sauthCookie",:value => cookie,:expires => Time.now+24*60*60) # 1 jour d'expiration
+		@back_url=params[:back_url]
+
+		redirect "#{params[:back_url]}?login=#{params[:login]}&secret=IamSAuth"
+	else
+		@errors="Wrong authentication!"
+		@appli=params[:appli]
+  	erb :"sessions/appli"
+  end
 end
 
 

@@ -1,7 +1,7 @@
 class AddUseridApplicationid < ActiveRecord::Migration
   def up
-    add_column :utilizations, :user_id, :string
-    add_column :utilizations, :application_id, :string
+    add_column :utilizations, :user_id, :integer
+    add_column :utilizations, :application_id, :integer
   end
 
   def down

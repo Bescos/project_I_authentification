@@ -11,7 +11,14 @@ class Application < ActiveRecord::Base
   validates :name, :uniqueness => true
   validates :url, :uniqueness => true
   
-  validates :user_id, :numericality => true
+#Send back URL if auth is OK
+def self.authentication(name) 
+	a = find_by_name(name)
+	if a
+		a.url
+	end
+end
+
 end
 
 

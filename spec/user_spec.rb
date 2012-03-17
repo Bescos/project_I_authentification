@@ -60,13 +60,12 @@ describe User do
 
 			it "should authenticate the user" do
 				 params = {'login'=>"toto",'password'=>"toto"}	
-				 #subject.should_receive(:authentication).with(params).and_return(true)
-				 User.authentication(params)
+				 User.authentication(params).should_not be_nil
 			end
 			it "should not authenticate the user" do
 				 params = {'login'=>"toto",'password'=>"tutu"}	
 				# subject.should_receive(:authentication).with(params).and_return(false)
-				 User.authentication(params)
+				 User.authentication(params).should be_nil
 			end
 			end 
 		end

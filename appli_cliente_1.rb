@@ -15,9 +15,7 @@ helpers do
   end
 end
 
-
-#La page protégée de l'application est affichée que si l'utilisateur est enregistré et logué 
-get '/appli_cliente1/protected' do
+get '/*' do
   if current_user
     erb :protected, :locals => {:user => current_user}
   else
@@ -25,5 +23,4 @@ get '/appli_cliente1/protected' do
     redirect '/sauth/appli_cliente1/sessions/new?origine=/protected'
   end
 end
-
 

@@ -18,7 +18,7 @@
 <% end %>
 
 
-<form action="/sessions" method="post">
+<form action="/<%= @appli %>/sessions" method="post">
   <div class="field">
     <label for="session_login">Login</label><br />
     <input id="session_login" name="login" size="30" type="text" value="<%= if @u; @u.login end %>"/>
@@ -26,6 +26,9 @@
   <div class="field">
     <label for="session_password">Password</label><br />
     <input id="session_password" name="password" size="30" type="password" value="<%= if @u; @u.password end %>"/>
+  </div>
+  <div class="field">
+    <input id="session_back_url" name="back_url" size="50" type="text" value="<%= @back_url %>">
   </div>
   <div class="actions">
     <input name="commit" type="submit" value="Create Session" />

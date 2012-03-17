@@ -27,8 +27,6 @@ def self.authentication(params)
 	u = find_by_login(params['login'])
 	if u and u.password == Digest::SHA1.hexdigest(params['password'])
 		true
-	else
-		nil
 	end
 end
 

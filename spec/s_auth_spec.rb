@@ -1,6 +1,4 @@
 $: << File.dirname(__FILE__)
-require 'rack/test'
-require_relative '../s_auth'
 require 'spec_helper'
 
 describe 'The Authentication App' do
@@ -44,7 +42,6 @@ describe 'The Authentication App' do
   end
 
   describe "Second case: User wants to connect" do
-
    it "should respond with a form for the logging" do
     get '/sessions/new'
     last_response.should be_ok
@@ -116,7 +113,7 @@ describe 'The Authentication App' do
       end
     end
     describe "post /applications" do
-      context "User connected and want to add an application" do
+      describe "User connected and want to add an application" do
 		    context "Validation of the post request" do
 		      before(:each) do
 						params2 = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1"} 
@@ -126,8 +123,9 @@ describe 'The Authentication App' do
 
 		      it "should respond with a secret" do
 		        last_response.status.should == 302
-		        last_response.headers["Location"].should == "http://example.org/applications/appli_cliente_1?secret=IamSAuth"
+		        last_response.headers["Location"].should include "http://example.org/applications/appli_cliente_1?secret="
 		      end
+					
 		    end
 		    
 		    context "Errors" do
@@ -164,10 +162,48 @@ describe 'The Authentication App' do
 		    end      
 		    Application.all.each{|a| a.destroy}
 				User.all.each{|u| u.destroy}
-		 end
-		 end
+		  end
 		end
- end
+	end
+	describe "Thrid case: an application redirects the user to Sauth" do
+		describe "get /appli/sessions/new" do
+			it "should respond with the login form" do
+				Application.should_receive(:authentication).with("appli_cliente_1").and_return("http://appli_cliente_1")
+				get '/appli_cliente_1/sessions/new?origin=/protected' 
+				last_response.should be_ok
+				last_response.body.should match %r{<form.*action="/appli_cliente_1/sessions".*method="post".*}
+				last_response.body.should match %r{<input id="session_back_url" name="back_url" size="50" type="text" value="http://appli_cliente_1/protected">}
+			end
+			it "should respond with the application register form if application is unknown" do
+				get '/appli_cliente_2/sessions/new?origin=/protected' 
+				last_response.should be_ok
+			  last_response.body.should include "The authentication service does not know the application called appli_cliente_2"
+			end
+		end
+		describe "post /appli/sessions/new" do
+			describe "Redirection to the application" do
+				it "should redirect the user to the back_url of the application" do
+					params = {'login'=>"TestAjout", 'password'=>"TestAjout", 'back_url'=>"http://appli_cliente_1/protected"}
+		      post '/appli_cliente_1/sessions', params
+					last_response.status.should == 302
+					#PB Lors du test, Le sinatra ne récupère pas @back_url. Cela fonctionne lors du test d'intégration
+					last_response.headers["Location"].should include "http://appli_cliente_1/protected?login=TestAjout&secret="
+				end
+	
+				describe "Errors" do
+					it "should send the authentication form again because password is wrong" do
+						params = {'login'=>"TestAjout", 'password'=>"TestFaux"}
+				    post '/appli_cliente_1/sessions', params
+						last_response.status.should == 200
+						last_response.body.should match %r{<form.*action="/appli_cliente_1/sessions".*method="post".*}
+					end
+				end
+
+			end
+		end
+	end 
+
+end
 
   
 
