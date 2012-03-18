@@ -66,8 +66,19 @@ describe 'The Authentication App' do
        last_request.env["rack.session"]["current_user"].should == "TestAjout"
      end
 		 it "should display the user profile" do
-			 get '/users/testAjout'
+			 get '/users/TestAjout',"","rack.session" => { "current_user" => "TestAjout" }
 			 last_response.body.should match %r{<title>User-Profile Page</title>}
+		 end
+		 it "should list utilizations and developed applications of the user" do
+			 user = double(User)
+			 User.stub(:find_by_login){user}
+			 User.should_receive(:find_by_login).with("TestAjout").and_return(user)
+			 user.should_receive(:id)
+			 
+			 Application.should_receive(:find_all_by_user_id)
+			 user.should_receive(:id)
+
+			 get '/users/TestAjout',"","rack.session" => { "current_user" => "TestAjout" }
 		 end
      it "should remove the variables of the current user when he disconnects" do
        last_request.env["rack.session"]["current_user"].should == "TestAjout"
@@ -99,6 +110,11 @@ describe 'The Authentication App' do
      last_response.status.should == 200
      last_response.body.should match %r{<form.*action="/sessions".*method="post".*}
     end
+		it "should not display the user profile if the current_user doesn't match the :login in /users/:login" do
+			 get '/users/TestAjout',"","rack.session" => { "current_user" => "false" }
+			 last_response.body.should match %r{<form.*action="/sessions".*method="post".*}
+			 last_response.body.should include "You don't have access rights for this page, please connect first !"
+		 end
    end
    #Destruction of the database
   User.all.each{|u| u.destroy}
@@ -183,6 +199,7 @@ describe 'The Authentication App' do
 		describe "post /appli/sessions/new" do
 			describe "Redirection to the application" do
 				it "should redirect the user to the back_url of the application" do
+					Utilization.stub(:useappli?){true}
 					params = {'login'=>"TestAjout", 'password'=>"TestAjout", 'back_url'=>"http://appli_cliente_1/protected"}
 		      post '/appli_cliente_1/sessions', params
 					last_response.status.should == 302
@@ -190,7 +207,10 @@ describe 'The Authentication App' do
 					last_response.headers["Location"].should include "http://appli_cliente_1/protected?login=TestAjout&secret="
 				end
 				it "should add the application to the list of utilization of the user" do
-					
+					Utilization.stub(:useappli?){true}
+					Utilization.should_receive(:useappli?).and_return(true)
+					params = {'login'=>"TestAjout", 'password'=>"TestAjout", 'back_url'=>"http://appli_cliente_1/protected"}
+		      post '/appli_cliente_1/sessions', params
 				end
 			end
 			describe "Errors" do
@@ -203,6 +223,35 @@ describe 'The Authentication App' do
 			end
 		end
 	end 
+	
+	describe "Administration part" do
+		describe "get /admin" do
+			context "Admin rights" do
+				before(:each) do
+					get '/users/admin',"","rack.session" => { "current_user" => "admin" }
+				end
+
+				it "should display the administration page for the admin" do
+					last_response.should be_ok
+					last_response.body.should match %r{<p> Administration page </p>}
+				end
+				it "should list the users of the Sauth" do
+					last_response.body.should match %r{<li>TestAjout</li>}
+				end
+			end
+			context "Errors" do
+				before(:each) do
+					get '/users/admin',"","rack.session" => { "current_user" => "false" }
+				end
+
+				it "should redirect the user to the authentication page" do
+					last_response.should be_ok
+					last_response.body.should match %r{<h1>New session</h1>}
+					last_response.body.should include "You don't have access rights for this page, please connect first !"
+				end
+			end
+		end
+	end
 
 end
 

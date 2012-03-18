@@ -8,15 +8,12 @@ class Utilization < ActiveRecord::Base
 
 #add the utilization if the user have not used application yet
 def self.useappli?(uid,aid)
-	if ut = find_by_user_id(uid)
-		 if !ut.application_id == aid
-		 	 new(uid,aid) 
-		 else
-			 true
-		 end
+	if ut = find_by_user_id_and_application_id(uid,aid)
+		 true
 	else
 		new(uid,aid)
 	end
 end
+
 
 end

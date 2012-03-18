@@ -60,8 +60,32 @@ end
 
 #Profil d'un utilisateur
 get "/users/:login" do
-  #"bonjour #{params[:login]}"
-  erb :"users/profil", :locals => {:login => params[:login]}
+	if session["current_user"]=="admin"
+		@users = []
+		User.all.each do |user|
+			@users.push(user)
+		end
+
+  	erb :"users/admin"
+	else
+		if session["current_user"]==params[:login]
+			@user=User.find_by_login(params[:login])
+			
+			@apps = []			
+			uses = Utilization.where(:user_id => @user.id)
+			uses.each do |use|
+				@apps.push(Application.find_by_id(use.application_id))
+			end
+
+			@devs = []
+			@devs = Application.find_all_by_user_id(@user.id)
+
+			erb :"users/profil"
+		else
+			@errors="You don't have access rights for this page, please connect first !"
+			erb :"sessions/new"
+		end
+	end
 end
 
 
@@ -138,6 +162,9 @@ end
 
 post '/:appli/sessions' do
 	if User.authentication(params)
+		user = User.find_by_login(params[:login])
+		appl = Application.find_by_name(params[:appli])
+		ut = Utilization.useappli?(user.id, appl.id)
 		login=params["login"]
     session["current_user"]=login
     cookie=generate_cookie
