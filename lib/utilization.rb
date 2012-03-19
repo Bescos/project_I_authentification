@@ -11,7 +11,8 @@ def self.useappli?(uid,aid)
 	if ut = find_by_user_id_and_application_id(uid,aid)
 		 true
 	else
-		new(uid,aid)
+		u = User.new
+		u = create(uid,aid)
 	end
 end
 

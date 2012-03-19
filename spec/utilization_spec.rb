@@ -47,14 +47,9 @@ describe Utilization do
 			@ut.user_id = @u1
 			@ut.should_not be_valid
 		end
-
-		it "should add the utilization if u2 have not used a1 yet" do
-			Utilization.should_receive(:new)
-			Utilization.useappli?(@u2.id,@a1.id)
-		end
 		
 		it "should add the utilization if u2 have not used a2 yet" do
-			Utilization.should_receive(:new)
+			Utilization.should_receive(:create)
 			Utilization.useappli?(@u2.id,@a2.id)
 		end
 

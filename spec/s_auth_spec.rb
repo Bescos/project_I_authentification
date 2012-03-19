@@ -17,12 +17,11 @@ describe 'The Authentication App' do
    end
    it "should store the user and redirect him to the login page with a login message" do		
 		params = {"user" => {'login'=>"TestAjout", 'password'=>"TestAjout"}}
-
     post '/users', params["user"]
     last_response.status.should == 302
     last_response.headers["Location"].should == 'http://example.org/users/TestAjout'
    end
-   describe "Erreurs" do
+   describe "Errors" do
     it "should send the erb form again to the user because the login already exists" do
      post '/users', params = {'login'=>"TestAjout", 'password'=>"TestAjout"}
      last_response.status.should == 200
@@ -132,9 +131,8 @@ describe 'The Authentication App' do
       describe "User connected and want to add an application" do
 		    context "Validation of the post request" do
 		      before(:each) do
-						params2 = { 'name' => "appli_cliente_1", 'url' => "http://appli_cliente_1"} 
-						User.stub(:find_by_login){'1'}
-		        post '/applications', params2, "rack.session" => { "current_user" => "toto" }
+						params2 = { 'name' => "appli_cliente_1", 'url' => "http://localhost:1800"} 
+		        post '/applications', params2, "rack.session" => { "current_user" => "TestAjout" }
 		      end
 
 		      it "should respond with a secret" do
@@ -147,25 +145,25 @@ describe 'The Authentication App' do
 		    context "Errors" do
 		      it "should send the application form again to the user because the name already exists" do
 		        params = { 'name' => "appli_cliente_1", 'url' => "Erreur1"} 
-		        post '/applications', params, "rack.session" => { "current_user" => "toto" }
+		        post '/applications', params, "rack.session" => { "current_user" => "TestAjout" }
 		        last_response.status.should == 200
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
 		      it "should send the application form again to the user because the url already exists" do
-		        params = { 'name' => "Erreur2", 'url' => "http://appli_cliente_1"} 
-		        post '/applications', params, "rack.session" => { "current_user" => "toto" }
+		        params = { 'name' => "Erreur2", 'url' => "http://localhost:1800"} 
+		        post '/applications', params, "rack.session" => { "current_user" => "TestAjout" }
 		        last_response.status.should == 200
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
 		      it "should send the application form again to the user because the name is empty" do
 		        params = { 'name' => "", 'url' => "Erreur3"} 
-		        post '/applications', params, "rack.session" => { "current_user" => "toto" }
+		        post '/applications', params, "rack.session" => { "current_user" => "TestAjout" }
 		        last_response.status.should == 200
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
 		      it "should send the application form again to the user because the url is empty" do
 		        params = { 'name' => "Erreur4", 'url' => ""} 
-		        post '/applications', params, "rack.session" => { "current_user" => "toto" }
+		        post '/applications', params, "rack.session" => { "current_user" => "TestAjout" }
 		        last_response.status.should == 200
 		        last_response.body.should match %r{<form.*action="/applications".*method="post".*}
 		      end
@@ -188,7 +186,7 @@ describe 'The Authentication App' do
 				get '/appli_cliente_1/sessions/new?origin=/protected' 
 				last_response.should be_ok
 				last_response.body.should match %r{<form.*action="/appli_cliente_1/sessions".*method="post".*}
-				last_response.body.should match %r{<input id="session_back_url" name="back_url" size="50" type="text" value="http://appli_cliente_1/protected">}
+				last_response.body.should match %r{<input id="session_back_url" name="back_url" size="50" type="hidden" value="http://appli_cliente_1/protected">}
 			end
 			it "should respond with the application register form if application is unknown" do
 				get '/appli_cliente_2/sessions/new?origin=/protected' 
@@ -205,12 +203,6 @@ describe 'The Authentication App' do
 					last_response.status.should == 302
 					#PB Lors du test, Le sinatra ne récupère pas @back_url. Cela fonctionne lors du test d'intégration
 					last_response.headers["Location"].should include "http://appli_cliente_1/protected?login=TestAjout&secret="
-				end
-				it "should add the application to the list of utilization of the user" do
-					Utilization.stub(:useappli?){true}
-					Utilization.should_receive(:useappli?).and_return(true)
-					params = {'login'=>"TestAjout", 'password'=>"TestAjout", 'back_url'=>"http://appli_cliente_1/protected"}
-		      post '/appli_cliente_1/sessions', params
 				end
 			end
 			describe "Errors" do
@@ -252,7 +244,27 @@ describe 'The Authentication App' do
 			end
 		end
 	end
+	
+	describe "Root of the application" do
+		describe "Non connected user" do
+			it "should redirect te user to /sessions/new" do
+				get '/'
+				last_response.should be_redirect
+				last_response.headers["Location"].should == "http://example.org/sessions/new"
+			end
+		end
+		describe "Non connected user" do
+			it "should redirect te user to /sessions/new" do
+				get '/', '', "rack.session" => { "current_user" => "TestAjout" }
+				last_response.should be_redirect
+			  last_response.headers["Location"].should include "http://example.org/users/TestAjout"
+			end
+		end
+	end
 
+	User.all.each{|u| u.destroy}
+	Application.all.each{|a| a.destroy}
+	Utilization.all.each{|ut| ut.destroy}
 end
 
   

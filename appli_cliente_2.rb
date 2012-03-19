@@ -1,6 +1,6 @@
 require 'sinatra'
 
-set :port, 1800
+set :port, 1801
 enable :sessions
 
 helpers do 
@@ -21,7 +21,7 @@ get '/protected' do
 				"Authentication Problem !"
 			end
 	else
-		redirect 'http://localhost:4567/appli_cliente_1/sessions/new?origin=/protected'
+		redirect 'http://localhost:4567/appli_cliente_2/sessions/new?origin=/protected'
 	end
 end
 

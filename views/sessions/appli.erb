@@ -28,7 +28,7 @@
     <input id="session_password" name="password" size="30" type="password" value="<%= if @u; @u.password end %>"/>
   </div>
   <div class="field">
-    <input id="session_back_url" name="back_url" size="50" type="text" value="<%= @back_url %>">
+    <input id="session_back_url" name="back_url" size="50" type="hidden" value="<%= @back_url %>">
   </div>
   <div class="actions">
     <input name="commit" type="submit" value="Create Session" />
