@@ -4,24 +4,24 @@
   <title>User Registration Page</title>
 </head>
 <body>
-
+<img src="/google_new.jpg" width=400 heigth=70 />
 <h1>New user</h1>
 
-<% if @errors.nil? %>
+<% if @u.nil? %>
 
 <p > To subscribe, please write a login and a password : </p>
 
 <% else %>
 <p>
-	<% if @errors[:password] %>
+	<% if @u.errors.messages[:password] %>
 	 Password can't be blank !
 	 <br />
 	<% end %>
-	<% if @errors[:login] %>
-  	<% if @errors[:login].include?("can't be blank") %>
+	<% if @u.errors.messages[:login] %>
+  	<% if @u.errors.messages[:login].include?("can't be blank") %>
 			Login can't be blank !
   	<% end %>
-		<% if @errors[:login].include?("has already been taken") %>
+		<% if @u.errors.messages[:login].include?("has already been taken") %>
 		Login
 		<%= @u.login %>
 		has already been taken
@@ -34,11 +34,11 @@
 <form action="/users" method="post">
   <div class="field">
     <label for="user_login">Login (*)</label><br />
-    <input id="user_login" name="login" size="30" type="text" value="<%= if @u; @u.login end %>"/>
+    <input id="user_login" name="login" size="30" type="text"/>
   </div>
   <div class="field">
     <label for="user_password">Password (*)</label><br />
-    <input id="user_password" name="password" size="30" type="password" value="<%= if @u; @u.password end %>"/>
+    <input id="user_password" name="password" size="30" type="password"/>
   </div>
   <div class="field">
     <label for="user_last_name">Last Name</label><br />

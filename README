@@ -1,14 +1,43 @@
-Déroulement des tests :
+===========================================================================
+									AUTHENTICATION SERVICE README FILE
+===========================================================================
+This Authentication service will provide you a easy-to-use service for all
+your applications and your clients.
 
-- Test de la fonction de logging
-  
-- Test de la fonction d'enregistrement
+===========================================================================
+												RUN THE APPLICATION
+===========================================================================
+At the root of the project, launch the command:
+	$ruby s_auth.rb
+
+The server will run and you can reach it with the url : http://localhost:4567/
 
 
+===========================================================================
+											FEATURES OF THE APPLICATION
+===========================================================================
+The service also contains two examples of applications that use the
+authentication service (appli_cliente_1.rb, appli_cliente_2.rb).
+To start it, at the root of the project, launch the command:
+	$ruby appli_cliente_1.rb
+  $ruby appli_cliente_2.rb
 
-Arborescence du projet :
+The first client application will run and you can reach it with the url : 
+http://localhost:1800/protected
+The second client application will run and you can reach it with the url : 
+http://localhost:1801/protected
+
+This will required an authentication and after redirect you to the 
+protected area of the client application.
+
+
+===========================================================================
+									TREE OF THE AUTHENTICATION SERVICE
+===========================================================================
+
 .
 ├── appli_cliente_1.rb
+├── appli_cliente_2.rb
 ├── config
 │   └── database.yml
 ├── database.rb
@@ -18,27 +47,45 @@ Arborescence du projet :
 │       ├── 001_create_users.rb
 │       ├── 002_add_login_password.rb
 │       ├── 003_add_city_email.rb
-│       └── 004_add_last_name_first_name.rb
+│       ├── 004_add_last_name_first_name.rb
+│       ├── 005_create_applications.rb
+│       ├── 006_add_name_url.rb
+│       ├── 007_add_secret.rb
+│       ├── 008_create_utilizations.rb
+│       ├── 009_add_userid_applicationid.rb
+│       └── 010_add_userid.rb
 ├── Gemfile
 ├── Gemfile.lock
 ├── lib
-│   └── user.rb
-├── middleware
-│   ├── lib
-│   │   ├── rack_cookie_session.rb
-│   │   ├── rack_debug.rb
-│   │   └── rack_session.rb
-│   └── my_middleware.rb
+│   ├── application.rb
+│   ├── user.rb
+│   └── utilization.rb
+├── log
+│   └── log_sessions.txt
 ├── migration.rb
 ├── README
 ├── s_auth.rb
 ├── spec
+│   ├── application_spec.rb
+│   ├── appli_cliente_1_spec.rb
 │   ├── s_auth_spec.rb
 │   ├── spec_helper.rb
-│   └── user_spec.rb
+│   ├── user_spec.rb
+│   └── utilization_spec.rb
 └── views
+    ├── applications
+    │   └── new.erb
     ├── protected.erb
-    ├── register.erb
-    └── sessions
-        └── new.erb
+    ├── sessions
+    │   ├── appli.erb
+    │   ├── google.jpg
+    │   └── new.erb
+    └── users
+        ├── admin.erb
+        ├── new.erb
+        └── profil.erb
+
+
+An application created by NEW GOOGLE.
+"Don't forget we are the NEW WORLD MASTER!"
 

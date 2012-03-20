@@ -1,6 +1,6 @@
 require 'sinatra'
 require 'active_record'
-
+require 'logger'
 require 'digest/sha1'
 
 require_relative 'database'
@@ -8,19 +8,12 @@ require_relative 'lib/user'
 require_relative 'lib/application'
 require_relative 'lib/utilization'
 
-#enable :sessions
+enable :sessions
 
-set :cookie_manager , Hash.new
-def generate_cookie
-  SecureRandom.base64
-end
+set :logger , Logger.new('log/log_sessions.txt', 'weekly')
 
 helpers do 
   def current_user
-    cookie = request.cookies["sauthCookie"]
-    if !cookie.nil?
-      session["current_user"]=settings.cookie_manager[cookie]
-    end
     session["current_user"]
   end
 
@@ -59,7 +52,7 @@ post '/users' do
    redirect "/users/#{params['login']}"
    #User invalide
   else
-     @errors = @u.errors.messages
+    # @errors = @u.errors.messages
 		 erb :"users/new"
   end
 end
@@ -87,6 +80,9 @@ get "/users/:login" do
 			@devs = []
 			@devs = Application.find_all_by_user_id(@user.id)
 
+			if params[:secret]
+				@secret=params[:secret]
+			end
 			erb :"users/profil"
 		else
 			@errors="You don't have access rights for this page, please connect first !"
@@ -105,12 +101,10 @@ end
 #Si le login et le mot de passe passés en post correspondent à une ligne de la table users de la base de donnée, lutilisateur est redirigee vers son profil ou lapplication dorigine
 #Sinon recharge le formulaire de connexion
 post '/sessions' do
+	settings.logger.info("post /sessions => "+params["login"])
 	if User.authentication(params)
-	  login=params["login"]
-    session["current_user"]=login
-    cookie=generate_cookie
-    settings.cookie_manager[cookie]=login
-    response.set_cookie("sauthCookie",:value => cookie,:expires => Time.now+24*60*60) # 1 jour d'expiration
+	 login=params["login"]
+   session["current_user"]=login
    
    redirect "/users/#{params[:login]}"
   else
@@ -141,7 +135,7 @@ post '/applications' do
     @a.user_id = User.find_by_login(session["current_user"]).id
 		
     if @a.save
-      redirect "/applications/#{params[:name]}?secret=IamSAuth"
+      redirect "/users/#{current_user}?secret=IamSAuth"
     else
       @errors = @a.errors.messages
       erb :"applications/new"
@@ -152,9 +146,6 @@ post '/applications' do
   end    
 end
 
-get '/applications/:name' do
-  "Application #{params[:name]} cree"
-end
 
 post '/applications/:name/delete' do
 	app = Application.find_by_name(params[:name])
@@ -167,6 +158,14 @@ get '/:appli/sessions/new' do
 		  @appli=params[:appli]
 			@back_url=url_appli+params[:origin]
 			if current_user
+				user = User.find_by_login(current_user)
+				appl = Application.find_by_name(params[:appli])
+				if !Utilization.find_by_user_id_and_application_id(user.id,appl.id)
+					u = Utilization.new
+					u.user_id = user.id
+					u.application_id = appl.id
+					u.save
+			  end
 				redirect "#{@back_url}?login=#{current_user}&secret=IamSAuth"
 			else
 				erb :"sessions/appli"
@@ -177,6 +176,7 @@ get '/:appli/sessions/new' do
 end
 
 post '/:appli/sessions' do
+		settings.logger.info("post /sessions => "+params["login"])
 		if User.authentication(params)
 			user = User.find_by_login(params[:login])
 			appl = Application.find_by_name(params[:appli])
@@ -189,9 +189,6 @@ post '/:appli/sessions' do
 			end
 			login=params["login"]
 		  session["current_user"]=login
-		  cookie=generate_cookie
-		  settings.cookie_manager[cookie]=login
-		  response.set_cookie("sauthCookie",:value => cookie,:expires => Time.now+24*60*60) # 1 jour d'expiration
 			@back_url=params[:back_url]
 
 			redirect "#{params[:back_url]}?login=#{params[:login]}&secret=IamSAuth"
@@ -201,6 +198,3 @@ post '/:appli/sessions' do
 			erb :"sessions/appli"
 		end
 end
-
-
-
