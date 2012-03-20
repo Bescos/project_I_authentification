@@ -45,7 +45,13 @@ end
 
 #Crée un utilisateur s'il est valide et redirige le user vers sa page de profil ou vers le meme formulaire en cas d'erreur
 post '/users' do
-  @u = User.new(params)
+  @u = User.new
+	@u.login = params[:login]
+	@u.password = params[:password]
+	@u.last_name = params[:last_name]
+	@u.first_name = params[:first_name]
+	@u.email = params[:email]
+	@u.city = params[:city]
 
   #Si le user est valide, on crée le user et on le redirige vers son profil
   if @u.save
@@ -134,8 +140,7 @@ post '/applications' do
     @a.url = params[:url]
     @a.user_id = User.find_by_login(session["current_user"]).id
 		
-    if @a.valid? 
-      @a.save
+    if @a.save
       redirect "/applications/#{params[:name]}?secret=IamSAuth"
     else
       @errors = @a.errors.messages
@@ -149,6 +154,12 @@ end
 
 get '/applications/:name' do
   "Application #{params[:name]} cree"
+end
+
+post '/applications/:name/delete' do
+	app = Application.find_by_name(params[:name])
+	app.destroy
+	redirect "/users/#{current_user}"	
 end
 
 get '/:appli/sessions/new' do
@@ -170,7 +181,6 @@ post '/:appli/sessions' do
 			user = User.find_by_login(params[:login])
 			appl = Application.find_by_name(params[:appli])
 
-		
 		  if !Utilization.find_by_user_id_and_application_id(user.id,appl.id)
 				u = Utilization.new
 				u.user_id = user.id
@@ -191,5 +201,6 @@ post '/:appli/sessions' do
 			erb :"sessions/appli"
 		end
 end
+
 
 

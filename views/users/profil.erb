@@ -26,7 +26,7 @@
 <div class="list">
 <ul>
 <% @devs.each do |dev| %>
-<li><%=dev.name%> (<%=dev.url%>)&nbsp;&nbsp;</li>
+<li><%=dev.name%> (<%=dev.url%>)&nbsp;&nbsp;<form action="/applications/<%=dev.name%>/delete" method="post"><input type="submit" value="Delete Appli" /></form></li>
 <% end %>
 </ul>
 </div>

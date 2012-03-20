@@ -197,7 +197,6 @@ describe 'The Authentication App' do
 		describe "post /appli/sessions/new" do
 			describe "Redirection to the application" do
 				it "should redirect the user to the back_url of the application" do
-					Utilization.stub(:useappli?){true}
 					params = {'login'=>"TestAjout", 'password'=>"TestAjout", 'back_url'=>"http://appli_cliente_1/protected"}
 		      post '/appli_cliente_1/sessions', params
 					last_response.status.should == 302
@@ -259,6 +258,20 @@ describe 'The Authentication App' do
 				last_response.should be_redirect
 			  last_response.headers["Location"].should include "http://example.org/users/TestAjout"
 			end
+		end
+	end
+
+	describe "Application deletion" do
+		it "should find the application" do
+			appli = double(User)
+			Application.should_receive(:find_by_name).and_return(appli)
+			appli.should_receive(:destroy)
+			post '/applications/appli_cliente_1/delete', '', "rack.session" => { "current_user" => "TestAjout" }
+		end
+		it "should redirect the user to his profile" do
+			post '/applications/appli_cliente_1/delete', '', "rack.session" => { "current_user" => "TestAjout" }
+			last_response.should be_redirect
+			last_response.headers["Location"].should include "http://example.org/users/TestAjout"
 		end
 	end
 

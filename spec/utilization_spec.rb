@@ -34,7 +34,7 @@ describe Utilization do
 			@ut.application_id = @a1.id
 			@ut.should be_valid
 			@ut.save
-			Utilization.useappli?(@u1.id,@a1.id).should be_true
+			Utilization.find_by_user_id_and_application_id(@u1.id,@a1.id).should be_true
 		end
 		
 		it "should not be valid without an user_id" do
@@ -46,11 +46,6 @@ describe Utilization do
 			@ut = Utilization.new
 			@ut.user_id = @u1
 			@ut.should_not be_valid
-		end
-		
-		it "should add the utilization if u2 have not used a2 yet" do
-			Utilization.should_receive(:create)
-			Utilization.useappli?(@u2.id,@a2.id)
 		end
 
 	end

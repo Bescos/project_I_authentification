@@ -1,7 +1,10 @@
+$: << File.dirname(__FILE__)
+require 'utilization'
+
 class Application < ActiveRecord::Base
   belongs_to :user
   
-  has_many :utilizations
+  has_many :utilizations, :dependent => :destroy
   has_many :users, :through => :utilizations
 
   validates :name, :presence => true

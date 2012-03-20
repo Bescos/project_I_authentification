@@ -1,6 +1,5 @@
 require_relative 'spec_helper'
 
-
 describe Application do
  	context "Test with 2 applications" do
 		before(:each) do
@@ -13,6 +12,7 @@ describe Application do
 		end
 		after(:each) do
 		  Application.all.each{|a| a.destroy}
+			User.all.each{|u| u.destroy}
 		end
 
 		it "sould not be valid without a name" do
@@ -84,5 +84,19 @@ describe Application do
 		end
 	end
  
+	describe "Application deletion method" do
+		context "Application deletion" do
+			it "should delete the application" do
+				@a1 = Application.new 
+		  	@a1.name = 'testApplication'
+		  	@a1.url = 'http://testApplication'
+		  	@a1.user_id = '1'
+		  	@a1.should be_valid
+		  	@a1.save
+				Application.delete(@a1)
+				Application.find_by_id(@a1).should be_nil				
+			end
+		end
+	end
 	
 end
