@@ -5,8 +5,10 @@ This Authentication service will provide you a easy-to-use service for all
 your applications and your clients.
 
 ===========================================================================
-												RUN THE APPLICATION
+														RUN THE APPLICATION
 ===========================================================================
+Prerequisites : Check line 11 of the s_auth.rb is not commented : enable :sessions
+
 At the root of the project, launch the command:
 	$ruby s_auth.rb
 
@@ -14,21 +16,52 @@ The server will run and you can reach it with the url : http://localhost:4567/
 
 
 ===========================================================================
-											FEATURES OF THE APPLICATION
+														TEST THE APPLICATION
 ===========================================================================
-The service also contains two examples of applications that use the
+1. When the server is launched, launch your favorite web browser at the address:
+http://localhost:4567/
+
+2. Now by clicking register, you can add an user.
+
+Indeed, once you have registered an user, you will be redirected to the
+user profile in which you can see his used application, his developed
+application, create an application or disconnect.
+
+3. When you click on create an application, to test the application exemples,
+type in name and url:
+	-appli_cliente_1
+	-http://localhost:1800
+
+and:
+	-appli_cliente_2
+	-http://localhost:1801
+
+After creating an application, you will be redirected to the user page
+and you could see the developed application in your profile.
+
+4. The service also contains two examples of applications that use the
 authentication service (appli_cliente_1.rb, appli_cliente_2.rb).
 To start it, at the root of the project, launch the command:
 	$ruby appli_cliente_1.rb
   $ruby appli_cliente_2.rb
 
-The first client application will run and you can reach it with the url : 
+5. The first client application will run and you can reach it with the url : 
 http://localhost:1800/protected
 The second client application will run and you can reach it with the url : 
 http://localhost:1801/protected
 
 This will required an authentication and after redirect you to the 
 protected area of the client application.
+
+
+===========================================================================
+														ORIENTED-RSPEC DEVELOPMENT
+===========================================================================
+Prerequisites : Comment line 11 of the s_auth.rb : #enable :sessions
+
+You will find my rspec tests in the folder called spec/
+For example, to run the s_auth_spec you have to type at the project root:
+$ rspec spec/s_auth_spec.rb --format documentation
 
 
 ===========================================================================

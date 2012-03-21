@@ -30,13 +30,13 @@ get '/' do
 	end
 end
 
-#Renvois le formulaire de création d'un utilisateur
+#Get the user creation form
 get '/users/new' do
   erb :"users/new", :locals => {:user => nil, :error => nil}
 end
 
 
-#Crée un utilisateur s'il est valide et redirige le user vers sa page de profil ou vers le meme formulaire en cas d'erreur
+#Creates the user and redirects him if it goes well or reload the form with errors
 post '/users' do
   @u = User.new
 	@u.login = params[:login]
@@ -46,19 +46,16 @@ post '/users' do
 	@u.email = params[:email]
 	@u.city = params[:city]
 
-  #Si le user est valide, on crée le user et on le redirige vers son profil
   if @u.save
    session["current_user"] = params[:login]
    redirect "/users/#{params['login']}"
-   #User invalide
   else
-    # @errors = @u.errors.messages
 		 erb :"users/new"
   end
 end
 
 
-#Profil d'un utilisateur
+#Load user profile or admin profile
 get "/users/:login" do
 	if session["current_user"]=="admin"
 		@users = []
@@ -92,14 +89,14 @@ get "/users/:login" do
 end
 
 
-#Renvois le template de nouvelle connexion
+#Load the connexion template
 get '/sessions/new' do
   erb :"sessions/new", :locals => {:user => nil, :error => nil}
 end
 
 
-#Si le login et le mot de passe passés en post correspondent à une ligne de la table users de la base de donnée, lutilisateur est redirigee vers son profil ou lapplication dorigine
-#Sinon recharge le formulaire de connexion
+#if login is OK, the user is redirected to his profile
+#Else reload the form with errors
 post '/sessions' do
 	settings.logger.info("post /sessions => "+params["login"])
 	if User.authentication(params)
@@ -115,18 +112,20 @@ post '/sessions' do
 end
 
 
-#Efface les informations associées à la session de l'utilisateur et le redirige vers la page de login
+#Disconnect the user, erase his session
 get '/sessions/disconnect' do
   session["current_user"] = nil
   erb :"sessions/new", :locals => {:user => nil, :error => nil}
 end
 
 
-#Renvois le formulaire de création d'une application
+#Load the creation application form
 get '/applications/new' do
   erb :"applications/new"
 end
 
+#Create an application if name and url are good and if there is a current_user
+#Or reload the form with errors
 post '/applications' do  
   if current_user
     @a = Application.new
@@ -146,13 +145,14 @@ post '/applications' do
   end    
 end
 
-
+#Delete the application to the database
 post '/applications/:name/delete' do
 	app = Application.find_by_name(params[:name])
 	app.destroy
 	redirect "/users/#{current_user}"	
 end
 
+#Get the login form from an application (it stores back_url in the form)
 get '/:appli/sessions/new' do
 		if url_appli=Application.authentication(params[:appli])	
 		  @appli=params[:appli]
@@ -175,6 +175,8 @@ get '/:appli/sessions/new' do
 		end
 end
 
+#if login is OK, the user is redirected to the application origin url
+#Else reload the form with errors
 post '/:appli/sessions' do
 		settings.logger.info("post /sessions => "+params["login"])
 		if User.authentication(params)
